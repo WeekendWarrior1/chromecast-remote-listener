@@ -6,15 +6,36 @@ FROM ${BUILD_FROM}
 COPY rootfs /
 
 # Setup base
+#   https://github.com/sorccu/docker-adb/blob/master/Dockerfile
+RUN set -xeo pipefail && \
+    apk update && \
+    apk add wget ca-certificates tini && \
+    wget -O "/etc/apk/keys/sgerrand.rsa.pub" \
+      "https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub" && \
+    wget -O "/tmp/glibc.apk" \
+      "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.28-r0/glibc-2.28-r0.apk" && \
+    wget -O "/tmp/glibc-bin.apk" \
+      "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.28-r0/glibc-bin-2.28-r0.apk" && \
+    apk add "/tmp/glibc.apk" "/tmp/glibc-bin.apk"
+
 RUN apk add --no-cache \
     coreutils=8.32-r2 \
     wget=1.21.1-r1 \
-    android-tools-adb \
+    #android-tools \
     python3 \
-    python3-pip
+    py3-pip
 
 #install python adb package
 RUN pip3 install pure-python-adb 
+
+# Expose default ADB port
+EXPOSE 5037
+
+# Set up PATH
+ENV PATH $PATH:/opt/platform-tools
+
+# Start the server by default
+CMD ["adb", "-a", "-P", "5037", "server", "nodaemon"]
 
 # Build arguments
 ARG BUILD_ARCH
