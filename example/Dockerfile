@@ -8,7 +8,13 @@ COPY rootfs /
 # Setup base
 RUN apk add --no-cache \
     coreutils=8.32-r2 \
-    wget=1.21.1-r1
+    wget=1.21.1-r1 \
+    android-tools-adb \
+    python3 \
+    python3-pip
+
+#install python adb package
+RUN pip3 install pure-python-adb 
 
 # Build arguments
 ARG BUILD_ARCH
